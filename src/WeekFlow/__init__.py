@@ -1,0 +1,1 @@
+"""Weekly report desktop application."""

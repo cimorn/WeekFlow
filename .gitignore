@@ -1,0 +1,26 @@
+# Local Python environments and caches
+.venv/
+.worktrees/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Build outputs
+build/
+dist/
+dist-electron/
+releases/
+WeekFlow.spec
+
+# JavaScript/Electron dependencies
+node_modules/
+# Local environment files
+.env
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Generated app icons
+src/weekflow_logo.icns

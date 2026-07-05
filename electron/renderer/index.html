@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WeekFlow</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <strong id="reportTitle">WeekFlow</strong>
+        </div>
+        <nav class="section-tabs" id="sectionTabs" aria-label="主要页面">
+          <button data-section="basic" class="active">基本信息</button>
+          <button data-section="results">成果感受</button>
+          <button data-section="projects">项目进展</button>
+          <button data-section="todos">待跟进</button>
+          <button data-section="preview">预览</button>
+        </nav>
+        <div class="top-action-group" aria-label="辅助操作">
+          <div class="compact-actions" id="fileActions">
+            <button id="newReportBtn">新建</button>
+            <button id="openReportBtn">打开</button>
+            <button id="saveBtn" class="primary">保存</button>
+            <button id="openPreviewBtn">独立预览</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="start-screen" id="startScreen" aria-label="启动页">
+        <section class="library-card">
+          <div class="section-head">
+            <h1>选择 data 里的文件</h1>
+          </div>
+          <div class="library-toolbar">
+            <span id="dataDirectoryHint">data</span>
+            <div class="library-actions">
+              <button id="startOpenReportBtn" class="primary" type="button">打开已有文件</button>
+              <button id="exportBackupBtn" type="button">导出备份</button>
+              <button id="refreshLibraryBtn" type="button">刷新</button>
+            </div>
+          </div>
+          <div class="backup-status" id="backupStatus"></div>
+          <div class="report-library" id="reportLibrary"></div>
+        </section>
+
+        <section class="library-card new-file-card">
+          <div class="section-head">
+            <h1>新建数据文件</h1>
+          </div>
+          <form id="newReportForm" class="new-report-form">
+            <label>
+              文件名
+              <input id="newStemInput" placeholder="例如：2026-week-01" autocomplete="off" required />
+            </label>
+            <label>
+              编号
+              <input id="newReportIdInput" placeholder="例如：01；不填则使用文件名" autocomplete="off" />
+            </label>
+            <label>
+              项目名称
+              <input id="newTopicInput" placeholder="例如：社区活动筹备与资料整理" autocomplete="off" />
+            </label>
+            <button id="createFromStartBtn" class="primary" type="submit">新建文件</button>
+          </form>
+        </section>
+      </section>
+
+      <div class="main-layout">
+        <main class="workspace" id="mainWorkspace">
+          <section class="page active" id="page-basic">
+            <section class="section-block basic-integrated-panel">
+              <div class="basic-form-grid">
+                <input id="reportIdInput" type="hidden" />
+                <label class="name-field">
+                  <span>标题</span>
+                  <input id="topicInput" aria-label="标题" placeholder="例如：社区活动筹备与资料整理" />
+                </label>
+                <div class="ai-optional-title">
+                  <strong>AI 接入</strong>
+                  <span>可选</span>
+                </div>
+                <button id="testAiBtn" class="test-ai-action" type="button">测试 AI</button>
+                <label class="base-url-field">
+                  <span>Base URL</span>
+                  <input id="aiBaseUrlInput" placeholder="https://.../v1" />
+                </label>
+                <label class="key-field">
+                  <span>API Key</span>
+                  <input id="aiKeyInput" type="password" placeholder="不会出现在预览和导出内容中" />
+                </label>
+                <label class="model-field">
+                  <span>Model / Endpoint</span>
+                  <input id="aiModelInput" placeholder="例如：qwen-plus" />
+                </label>
+                <div class="ai-inline-status" id="aiInlineStatus"></div>
+                <label class="summary-field">
+                  <div class="field-title-row">
+                    <span>总结</span>
+                    <button id="summaryPolishBtn" type="button">AI 润色总结</button>
+                  </div>
+                  <textarea id="summaryInput" class="medium-textarea" placeholder="填写本周最核心的总结；也可以点击右侧按钮交给 AI 生成。"></textarea>
+                </label>
+              </div>
+            </section>
+          </section>
+
+          <section class="page" id="page-results">
+            <div class="results-feeling-grid">
+              <section class="section-block">
+                <div class="section-head">
+                  <h1>本周成果</h1>
+                </div>
+                <div class="inline-add">
+                  <input id="achievementInput" placeholder="新增一条成果，例如：完成周报工具打包流程" />
+                  <button id="addAchievementBtn">添加</button>
+                </div>
+                <div class="editable-list" id="achievementsList"></div>
+              </section>
+
+              <section class="section-block">
+                <div class="section-head">
+                  <h1>本周感受</h1>
+                </div>
+                <textarea id="feelingInput" class="tall-textarea" placeholder="例如：本周最大的阻塞是什么、下一步需要怎样推进。"></textarea>
+                <div class="button-row">
+                  <button id="polishBtn" type="button">AI 润色本周感受</button>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <section class="page" id="page-projects">
+            <div class="project-workspace">
+              <aside class="project-picker">
+                <div class="picker-header">
+                  <h1>项目列表</h1>
+                </div>
+                <div id="projectList" class="project-list"></div>
+                <div class="project-actions">
+                  <button id="addProjectBtn">新增</button>
+                  <button id="deleteProjectBtn">删除</button>
+                  <button id="moveProjectUpBtn">上移</button>
+                  <button id="moveProjectDownBtn">下移</button>
+                </div>
+              </aside>
+
+              <section class="project-main">
+                <div class="project-main-head">
+                  <div>
+                    <h1>项目进展</h1>
+                  </div>
+                  <nav class="project-mode-tabs" id="projectModeTabs" aria-label="项目子页面">
+                    <button data-project-mode="overview" class="active">查看项目</button>
+                    <button data-project-mode="progress">填写进展</button>
+                    <button data-project-mode="result">记录结果</button>
+                    <button data-project-mode="timeline">时间流水</button>
+                  </nav>
+                </div>
+
+                <div class="project-pane active" id="projectOverview"></div>
+
+                <div class="project-pane" id="projectProgress">
+                  <div class="project-workflow-step progress-step">
+                    <div class="step-label">01</div>
+                    <div class="step-body">
+                      <h2>填写进展摘要</h2>
+                      <label>
+                        项目名称
+                        <input id="projectNameInput" placeholder="例如：AI 配置入口优化" />
+                      </label>
+                      <div class="two-columns">
+                        <label>
+                          本周推进
+                          <textarea id="projectSummaryInput" placeholder="写已经推进的事实：完成了什么，解决了什么问题。"></textarea>
+                        </label>
+                        <label>
+                          下一步
+                          <textarea id="projectNextInput" placeholder="写下一步动作：谁来做，什么时候验证。"></textarea>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="project-pane" id="projectResult">
+                  <div class="project-workflow-step result-step">
+                    <div class="step-label">02</div>
+                    <div class="step-body">
+                      <h2>记录结果沉淀</h2>
+                      <div class="two-columns">
+                        <label>
+                          结果说明
+                          <textarea id="projectResultInput" placeholder="例如：已交付测试版，安装包路径为..."></textarea>
+                        </label>
+                        <div class="image-zone">
+                          <label>
+                            结果图片
+                            <div id="projectImages" class="image-list"></div>
+                          </label>
+                          <div class="button-row">
+                            <button id="addProjectImageBtn">添加图片</button>
+                            <button id="removeProjectImageBtn">删除选中图片</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="project-pane" id="projectTimeline">
+                  <div class="project-workflow-step timeline-step">
+                    <div class="step-label">03</div>
+                    <div class="step-body">
+                      <h2>时间流水</h2>
+                      <div class="button-row">
+                        <button id="addRecordBtn">新增记录</button>
+                        <button id="deleteRecordBtn">删除选中记录</button>
+                      </div>
+                      <table class="timeline-table">
+                        <thead>
+                          <tr>
+                            <th>日期</th>
+                            <th>时间</th>
+                            <th>名称</th>
+                            <th>内容</th>
+                            <th>结果</th>
+                          </tr>
+                        </thead>
+                        <tbody id="recordsBody"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <section class="page" id="page-todos">
+            <section class="section-block narrow-section">
+              <div class="section-head">
+                <h1>待跟进事项</h1>
+              </div>
+              <div class="inline-add">
+                <input id="todoInput" placeholder="新增待跟进事项" />
+                <button id="addTodoBtn">添加</button>
+              </div>
+              <div id="todoList" class="editable-list"></div>
+            </section>
+          </section>
+
+          <section class="page" id="page-preview">
+            <div class="preview-grid">
+              <section class="section-block markdown-preview">
+                <div class="section-head compact-head">
+                  <h1>Markdown</h1>
+                  <select id="previewThemeInput" aria-label="预览主题">
+                    <option value="report">报告蓝</option>
+                    <option value="spring">浅蓝</option>
+                    <option value="pink">深蓝</option>
+                  </select>
+                </div>
+                <textarea id="markdownOutput" readonly></textarea>
+              </section>
+              <section class="section-block rendered-preview">
+                <div class="section-head">
+                  <h1>渲染预览</h1>
+                </div>
+                <iframe id="previewFrame" title="周报预览"></iframe>
+              </section>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>
